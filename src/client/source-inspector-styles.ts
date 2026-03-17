@@ -79,6 +79,9 @@ export interface InlineStyles {
   hoverOutline: CSSProperties;
   hoverLabel: CSSProperties;
   row: CSSProperties;
+  rowValueInline: CSSProperties;
+  iconButton: CSSProperties;
+  iconSvg: CSSProperties;
   key: CSSProperties;
   value: CSSProperties;
   codeValue: CSSProperties;
@@ -460,6 +463,32 @@ export const styles: InlineStyles = {
     gap: INSPECTOR_ROW_GAP_PX,
     marginBottom: INSPECTOR_ROW_MARGIN_BOTTOM_PX,
     alignItems: "start",
+  },
+  rowValueInline: {
+    display: "flex",
+    alignItems: "center",
+    gap: INSPECTOR_ROW_GAP_PX,
+    minWidth: 0,
+  },
+  iconButton: {
+    border: "1px solid #4a4a42",
+    borderRadius: INSPECTOR_RADIUS_PX,
+    background: "#171714",
+    color: "#d7d5c5",
+    width: 24,
+    height: 24,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    padding: 0,
+    lineHeight: INSPECTOR_LINE_HEIGHT_COMPACT,
+    flexShrink: 0,
+  },
+  iconSvg: {
+    width: 12,
+    height: 12,
+    display: "block",
   },
   key: {
     color: "#8c8b7f",

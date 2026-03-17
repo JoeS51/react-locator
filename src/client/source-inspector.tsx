@@ -28,6 +28,7 @@ import {
   isInspectorHelpKeybinding,
   isInspectorToggleKeybinding,
   isTypingContext,
+  sanitizeSourceFilePath,
   type HoverBounds,
 } from "./source-inspector-utils.js";
 
@@ -452,6 +453,19 @@ export const SourceInspector = ({
     event.stopPropagation();
   }, []);
 
+  const copyToClipboard = useCallback(
+    async (value: string, successMessage: string) => {
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+        setTransientActionMessage(successMessage);
+      } catch {
+        setTransientActionMessage("clipboard access failed");
+      }
+    },
+    [setTransientActionMessage],
+  );
+
   const sourceFilePath = data?.elementInfo.source?.filePath ?? null;
   const sourceLineNumber = data?.elementInfo.source?.lineNumber ?? null;
   const ideFileLink = sourceFilePath ? getIdeFileLink(sourceFilePath, sourceLineNumber) : null;
@@ -548,19 +562,40 @@ export const SourceInspector = ({
                     <p style={styles.sectionTitle}>source location</p>
                     <div style={styles.row}>
                       <span style={styles.key}>file</span>
-                      {data.elementInfo.source?.filePath ? (
-                        <a
-                          href={getIdeFileLink(
-                            data.elementInfo.source.filePath,
-                            data.elementInfo.source.lineNumber,
-                          )}
-                          style={styles.linkValue}
+                      <div style={styles.rowValueInline}>
+                        {data.elementInfo.source?.filePath ? (
+                          <a
+                            href={getIdeFileLink(
+                              data.elementInfo.source.filePath,
+                              data.elementInfo.source.lineNumber,
+                            )}
+                            style={styles.linkValue}
+                          >
+                            {data.elementInfo.source.filePath}
+                          </a>
+                        ) : (
+                          <code style={styles.codeValue}>n/a</code>
+                        )}
+                        <button
+                          type="button"
+                          style={styles.iconButton}
+                          aria-label="Copy source path"
+                          title="Copy source path"
+                          onClick={() => {
+                            const sourcePath = data.elementInfo.source?.filePath;
+                            if (!sourcePath) {
+                              setTransientActionMessage("source path unavailable");
+                              return;
+                            }
+                            void copyToClipboard(sanitizeSourceFilePath(sourcePath), "source path copied");
+                          }}
                         >
-                          {data.elementInfo.source.filePath}
-                        </a>
-                      ) : (
-                        <code style={styles.codeValue}>n/a</code>
-                      )}
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={styles.iconSvg}>
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
 
                     <div style={styles.row}>
