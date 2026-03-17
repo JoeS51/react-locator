@@ -7,7 +7,10 @@ import {
   INSPECTOR_HOVER_MIN_SIZE_PX,
   INSPECTOR_HOVER_SEARCH_MAX_ANCESTORS,
   INSPECTOR_ACTION_MESSAGE_TIMEOUT_MS,
-  INSPECTOR_MODE_INTRO_DURATION_MS,
+  INSPECTOR_MODE_INTRO_ENTER_DURATION_MS,
+  INSPECTOR_MODE_INTRO_MIN_VISIBLE_MS,
+  INSPECTOR_MODE_INTRO_MAX_VISIBLE_MS,
+  INSPECTOR_MODE_INTRO_EXIT_DURATION_MS,
 } from "../constants.js";
 import type {
   SourceBlamePanelData,
@@ -37,6 +40,8 @@ interface HoverResolution {
   element: Element;
   elementInfo: ElementInfo;
 }
+
+type ModeIntroPhase = "hidden" | "entering" | "visible" | "exiting";
 
 const HELP_DEMO_STYLE_TEXT = `
 @keyframes inspector-help-cursor-move {
@@ -80,7 +85,7 @@ export const SourceInspector = ({
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isHelpVisible, setIsHelpVisible] = useState(false);
   const [isGitDetailsVisible, setIsGitDetailsVisible] = useState(false);
-  const [isModeIntroVisible, setIsModeIntroVisible] = useState(false);
+  const [modeIntroPhase, setModeIntroPhase] = useState<ModeIntroPhase>("hidden");
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const shellElementRef = useRef<HTMLDivElement | null>(null);
   const hoveredElementRef = useRef<Element | null>(null);
@@ -90,7 +95,12 @@ export const SourceInspector = ({
   const latestHoverBoundsRef = useRef<HoverBounds | null>(null);
   const moveFrameRef = useRef<number | null>(null);
   const actionMessageTimeoutRef = useRef<number | null>(null);
-  const modeIntroTimeoutRef = useRef<number | null>(null);
+  const modeIntroEnterTimeoutRef = useRef<number | null>(null);
+  const modeIntroAutoHideTimeoutRef = useRef<number | null>(null);
+  const modeIntroExitTimeoutRef = useRef<number | null>(null);
+  const modeIntroAnimationFrameRef = useRef<number | null>(null);
+  const modeIntroShownAtRef = useRef<number>(0);
+  const modeIntroPhaseRef = useRef<ModeIntroPhase>("hidden");
   const hoverPrefetchTimeoutRef = useRef<number | null>(null);
   const elementInfoCacheRef = useRef<WeakMap<Element, ElementInfo>>(new WeakMap());
   const blameCacheRef = useRef<Map<string, { blame: SourceBlameResponse | null; error: string | null }>>(
@@ -109,6 +119,76 @@ export const SourceInspector = ({
     }, INSPECTOR_ACTION_MESSAGE_TIMEOUT_MS);
   }, []);
 
+  const setModeIntroPhaseValue = useCallback((phase: ModeIntroPhase) => {
+    modeIntroPhaseRef.current = phase;
+    setModeIntroPhase(phase);
+  }, []);
+
+  const clearModeIntroTimers = useCallback(() => {
+    if (modeIntroAnimationFrameRef.current !== null) {
+      cancelAnimationFrame(modeIntroAnimationFrameRef.current);
+      modeIntroAnimationFrameRef.current = null;
+    }
+    if (modeIntroEnterTimeoutRef.current !== null) {
+      window.clearTimeout(modeIntroEnterTimeoutRef.current);
+      modeIntroEnterTimeoutRef.current = null;
+    }
+    if (modeIntroAutoHideTimeoutRef.current !== null) {
+      window.clearTimeout(modeIntroAutoHideTimeoutRef.current);
+      modeIntroAutoHideTimeoutRef.current = null;
+    }
+    if (modeIntroExitTimeoutRef.current !== null) {
+      window.clearTimeout(modeIntroExitTimeoutRef.current);
+      modeIntroExitTimeoutRef.current = null;
+    }
+  }, []);
+
+  const requestHideModeIntro = useCallback(() => {
+    const currentPhase = modeIntroPhaseRef.current;
+    if (currentPhase === "hidden" || currentPhase === "exiting") return;
+
+    if (modeIntroAutoHideTimeoutRef.current !== null) {
+      window.clearTimeout(modeIntroAutoHideTimeoutRef.current);
+      modeIntroAutoHideTimeoutRef.current = null;
+    }
+
+    const elapsedSinceShownMs = Date.now() - modeIntroShownAtRef.current;
+    const remainingMinVisibleMs = Math.max(0, INSPECTOR_MODE_INTRO_MIN_VISIBLE_MS - elapsedSinceShownMs);
+
+    if (modeIntroExitTimeoutRef.current !== null) {
+      window.clearTimeout(modeIntroExitTimeoutRef.current);
+    }
+
+    modeIntroExitTimeoutRef.current = window.setTimeout(() => {
+      setModeIntroPhaseValue("exiting");
+      modeIntroExitTimeoutRef.current = window.setTimeout(() => {
+        setModeIntroPhaseValue("hidden");
+        modeIntroExitTimeoutRef.current = null;
+      }, INSPECTOR_MODE_INTRO_EXIT_DURATION_MS);
+    }, remainingMinVisibleMs);
+  }, [setModeIntroPhaseValue]);
+
+  const startModeIntro = useCallback(() => {
+    clearModeIntroTimers();
+    modeIntroShownAtRef.current = Date.now();
+    setModeIntroPhaseValue("hidden");
+
+    modeIntroAnimationFrameRef.current = requestAnimationFrame(() => {
+      setModeIntroPhaseValue("entering");
+      modeIntroAnimationFrameRef.current = null;
+    });
+
+    modeIntroEnterTimeoutRef.current = window.setTimeout(() => {
+      setModeIntroPhaseValue("visible");
+      modeIntroEnterTimeoutRef.current = null;
+    }, INSPECTOR_MODE_INTRO_ENTER_DURATION_MS);
+
+    modeIntroAutoHideTimeoutRef.current = window.setTimeout(() => {
+      requestHideModeIntro();
+      modeIntroAutoHideTimeoutRef.current = null;
+    }, INSPECTOR_MODE_INTRO_MAX_VISIBLE_MS);
+  }, [clearModeIntroTimers, requestHideModeIntro, setModeIntroPhaseValue]);
+
   const resumeHoverMode = useCallback(() => {
     if (hoverPrefetchTimeoutRef.current !== null) {
       window.clearTimeout(hoverPrefetchTimeoutRef.current);
@@ -125,8 +205,9 @@ export const SourceInspector = ({
     setHoverElementInfo(null);
     setHoverBounds(null);
     setIsGitDetailsVisible(false);
-    setIsModeIntroVisible(false);
-  }, []);
+    clearModeIntroTimers();
+    setModeIntroPhaseValue("hidden");
+  }, [clearModeIntroTimers, setModeIntroPhaseValue]);
 
   const resolveElementInfoCached = useCallback(async (target: Element): Promise<ElementInfo> => {
     const cached = elementInfoCacheRef.current.get(target);
@@ -230,6 +311,7 @@ export const SourceInspector = ({
       if (isElementInInspectorOverlay(target, shellElementRef.current)) return;
       if (hoveredElementRef.current === target) return;
 
+      requestHideModeIntro();
       hoveredElementRef.current = target;
       latestHoverTargetRef.current = target;
       if (moveFrameRef.current !== null) {
@@ -239,7 +321,7 @@ export const SourceInspector = ({
         void processLatestHoverTarget();
       });
     },
-    [inspecting, isHelpVisible, isSelectionLocked, processLatestHoverTarget],
+    [inspecting, isHelpVisible, isSelectionLocked, processLatestHoverTarget, requestHideModeIntro],
   );
 
   const handleDocumentClick = useCallback(
@@ -323,7 +405,8 @@ export const SourceInspector = ({
             setIsPopupVisible(false);
             setIsHelpVisible(false);
             setIsGitDetailsVisible(false);
-            setIsModeIntroVisible(false);
+            clearModeIntroTimers();
+            setModeIntroPhaseValue("hidden");
             setHoverElementInfo(null);
             setHoverBounds(null);
             setData(null);
@@ -349,7 +432,8 @@ export const SourceInspector = ({
       setIsPopupVisible(false);
       setIsHelpVisible(false);
       setIsGitDetailsVisible(false);
-      setIsModeIntroVisible(false);
+      clearModeIntroTimers();
+      setModeIntroPhaseValue("hidden");
       setHoverElementInfo(null);
       setHoverBounds(null);
       setData(null);
@@ -357,36 +441,23 @@ export const SourceInspector = ({
     };
     document.addEventListener("keydown", handleKeydown);
     return () => document.removeEventListener("keydown", handleKeydown);
-  }, [enabled, isHelpVisible]);
+  }, [clearModeIntroTimers, enabled, isHelpVisible, setModeIntroPhaseValue]);
 
   useEffect(() => {
     if (!enabled) return;
     if (!inspecting) {
       document.body.style.cursor = "";
-      setIsModeIntroVisible(false);
-      if (modeIntroTimeoutRef.current !== null) {
-        window.clearTimeout(modeIntroTimeoutRef.current);
-        modeIntroTimeoutRef.current = null;
-      }
+      clearModeIntroTimers();
+      setModeIntroPhaseValue("hidden");
       return;
     }
     document.body.style.cursor = "crosshair";
-    setIsModeIntroVisible(true);
-    if (modeIntroTimeoutRef.current !== null) {
-      window.clearTimeout(modeIntroTimeoutRef.current);
-    }
-    modeIntroTimeoutRef.current = window.setTimeout(() => {
-      setIsModeIntroVisible(false);
-      modeIntroTimeoutRef.current = null;
-    }, INSPECTOR_MODE_INTRO_DURATION_MS);
+    startModeIntro();
     return () => {
       document.body.style.cursor = "";
-      if (modeIntroTimeoutRef.current !== null) {
-        window.clearTimeout(modeIntroTimeoutRef.current);
-        modeIntroTimeoutRef.current = null;
-      }
+      clearModeIntroTimers();
     };
-  }, [enabled, inspecting]);
+  }, [clearModeIntroTimers, enabled, inspecting, setModeIntroPhaseValue, startModeIntro]);
 
   useEffect(() => {
     if (!(isLoading || data)) {
@@ -458,13 +529,11 @@ export const SourceInspector = ({
       if (hoverPrefetchTimeoutRef.current !== null) {
         window.clearTimeout(hoverPrefetchTimeoutRef.current);
       }
-      if (modeIntroTimeoutRef.current !== null) {
-        window.clearTimeout(modeIntroTimeoutRef.current);
-      }
+      clearModeIntroTimers();
       latestHoverTargetRef.current = null;
       isHoverResolutionInFlightRef.current = false;
     };
-  }, []);
+  }, [clearModeIntroTimers]);
 
   const panelStyle = getPanelStyle(isPopupVisible);
 
@@ -505,11 +574,26 @@ export const SourceInspector = ({
           <div
             style={{
               ...styles.modeIntroOverlay,
-              opacity: isModeIntroVisible ? 1 : 0,
-              visibility: isModeIntroVisible ? "visible" : "hidden",
+              opacity: modeIntroPhase === "hidden" ? 0 : modeIntroPhase === "exiting" ? 0 : 1,
+              visibility: modeIntroPhase === "hidden" ? "hidden" : "visible",
             }}
           >
-            <div style={styles.modeIntroCard}>
+            <div
+              style={{
+                ...styles.modeIntroCard,
+                opacity: modeIntroPhase === "hidden" ? 0 : modeIntroPhase === "exiting" ? 0 : 1,
+                transform:
+                  modeIntroPhase === "hidden"
+                    ? "translate3d(0, 10px, 0) scale(0.96)"
+                    : modeIntroPhase === "exiting"
+                      ? "translate3d(0, -4px, 0) scale(0.99)"
+                      : "translate3d(0, 0, 0) scale(1)",
+                transitionDuration:
+                  modeIntroPhase === "exiting"
+                    ? `${INSPECTOR_MODE_INTRO_EXIT_DURATION_MS}ms`
+                    : `${INSPECTOR_MODE_INTRO_ENTER_DURATION_MS}ms`,
+              }}
+            >
               <p style={styles.modeIntroTitle}>inspector enabled</p>
               <p style={styles.modeIntroHint}>hover components · option + click to analyze · esc to exit</p>
             </div>

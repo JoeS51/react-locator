@@ -399,6 +399,9 @@ export const styles: InlineStyles = {
     textAlign: "center",
     minWidth: 420,
     maxWidth: 560,
+    transitionProperty: "opacity, transform",
+    transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+    willChange: "opacity, transform",
   },
   modeIntroTitle: {
     margin: 0,
