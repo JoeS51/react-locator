@@ -7,6 +7,7 @@ import {
   INSPECTOR_HOVER_MIN_SIZE_PX,
   INSPECTOR_HOVER_SEARCH_MAX_ANCESTORS,
   INSPECTOR_ACTION_MESSAGE_TIMEOUT_MS,
+  INSPECTOR_MODE_INTRO_DURATION_MS,
 } from "../constants.js";
 import type {
   SourceBlamePanelData,
@@ -79,6 +80,7 @@ export const SourceInspector = ({
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isHelpVisible, setIsHelpVisible] = useState(false);
   const [isGitDetailsVisible, setIsGitDetailsVisible] = useState(false);
+  const [isModeIntroVisible, setIsModeIntroVisible] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const shellElementRef = useRef<HTMLDivElement | null>(null);
   const hoveredElementRef = useRef<Element | null>(null);
@@ -88,6 +90,7 @@ export const SourceInspector = ({
   const latestHoverBoundsRef = useRef<HoverBounds | null>(null);
   const moveFrameRef = useRef<number | null>(null);
   const actionMessageTimeoutRef = useRef<number | null>(null);
+  const modeIntroTimeoutRef = useRef<number | null>(null);
   const hoverPrefetchTimeoutRef = useRef<number | null>(null);
   const elementInfoCacheRef = useRef<WeakMap<Element, ElementInfo>>(new WeakMap());
   const blameCacheRef = useRef<Map<string, { blame: SourceBlameResponse | null; error: string | null }>>(
@@ -124,6 +127,7 @@ export const SourceInspector = ({
     setHoverElementInfo(null);
     setHoverBounds(null);
     setIsGitDetailsVisible(false);
+    setIsModeIntroVisible(false);
   }, []);
 
   const resolveElementInfoCached = useCallback(async (target: Element): Promise<ElementInfo> => {
@@ -321,6 +325,7 @@ export const SourceInspector = ({
             setIsPopupVisible(false);
             setIsHelpVisible(false);
             setIsGitDetailsVisible(false);
+            setIsModeIntroVisible(false);
             setHoverElementInfo(null);
             setHoverBounds(null);
             setData(null);
@@ -346,6 +351,7 @@ export const SourceInspector = ({
       setIsPopupVisible(false);
       setIsHelpVisible(false);
       setIsGitDetailsVisible(false);
+      setIsModeIntroVisible(false);
       setHoverElementInfo(null);
       setHoverBounds(null);
       setData(null);
@@ -359,11 +365,28 @@ export const SourceInspector = ({
     if (!enabled) return;
     if (!inspecting) {
       document.body.style.cursor = "";
+      setIsModeIntroVisible(false);
+      if (modeIntroTimeoutRef.current !== null) {
+        window.clearTimeout(modeIntroTimeoutRef.current);
+        modeIntroTimeoutRef.current = null;
+      }
       return;
     }
     document.body.style.cursor = "crosshair";
+    setIsModeIntroVisible(true);
+    if (modeIntroTimeoutRef.current !== null) {
+      window.clearTimeout(modeIntroTimeoutRef.current);
+    }
+    modeIntroTimeoutRef.current = window.setTimeout(() => {
+      setIsModeIntroVisible(false);
+      modeIntroTimeoutRef.current = null;
+    }, INSPECTOR_MODE_INTRO_DURATION_MS);
     return () => {
       document.body.style.cursor = "";
+      if (modeIntroTimeoutRef.current !== null) {
+        window.clearTimeout(modeIntroTimeoutRef.current);
+        modeIntroTimeoutRef.current = null;
+      }
     };
   }, [enabled, inspecting]);
 
@@ -437,6 +460,9 @@ export const SourceInspector = ({
       if (hoverPrefetchTimeoutRef.current !== null) {
         window.clearTimeout(hoverPrefetchTimeoutRef.current);
       }
+      if (modeIntroTimeoutRef.current !== null) {
+        window.clearTimeout(modeIntroTimeoutRef.current);
+      }
       latestHoverTargetRef.current = null;
       isHoverResolutionInFlightRef.current = false;
     };
@@ -492,6 +518,18 @@ export const SourceInspector = ({
             />
             <span style={styles.modeText}>{inspectorModeTitle}</span>
             {inspectorModeHint ? <span style={styles.modeHint}>{inspectorModeHint}</span> : null}
+          </div>
+          <div
+            style={{
+              ...styles.modeIntroOverlay,
+              opacity: isModeIntroVisible ? 1 : 0,
+              visibility: isModeIntroVisible ? "visible" : "hidden",
+            }}
+          >
+            <div style={styles.modeIntroCard}>
+              <p style={styles.modeIntroTitle}>inspector enabled</p>
+              <p style={styles.modeIntroHint}>hover components · option + click to analyze · esc to exit</p>
+            </div>
           </div>
         </>
       )}

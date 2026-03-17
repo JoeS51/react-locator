@@ -69,6 +69,10 @@ export interface InlineStyles {
   modeDotAnalysis: CSSProperties;
   modeText: CSSProperties;
   modeHint: CSSProperties;
+  modeIntroOverlay: CSSProperties;
+  modeIntroCard: CSSProperties;
+  modeIntroTitle: CSSProperties;
+  modeIntroHint: CSSProperties;
   modeFrame: CSSProperties;
   section: CSSProperties;
   sectionTitle: CSSProperties;
@@ -369,6 +373,42 @@ export const styles: InlineStyles = {
     textTransform: "lowercase",
   },
   modeHint: {
+    fontSize: INSPECTOR_FONT_SIZE_XS_PX,
+    color: "#b5b4a6",
+    textTransform: "lowercase",
+  },
+  modeIntroOverlay: {
+    position: "fixed",
+    inset: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "none",
+    zIndex: PANEL_Z_INDEX,
+    transitionProperty: "opacity",
+    transitionDuration: "220ms",
+    transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+  },
+  modeIntroCard: {
+    border: "1px solid #4a4a42",
+    borderRadius: INSPECTOR_RADIUS_PX,
+    background: "rgba(10, 10, 8, 0.96)",
+    color: "#efedd8",
+    boxShadow: "0 24px 40px -28px rgba(2, 6, 23, 0.95)",
+    padding: "14px 16px",
+    textAlign: "center",
+    minWidth: 420,
+    maxWidth: 560,
+  },
+  modeIntroTitle: {
+    margin: 0,
+    fontSize: INSPECTOR_FONT_SIZE_SM_PX,
+    fontWeight: INSPECTOR_FONT_WEIGHT_BOLD,
+    textTransform: "lowercase",
+    letterSpacing: `${INSPECTOR_LETTER_SPACING_EM}px`,
+  },
+  modeIntroHint: {
+    margin: "8px 0 0",
     fontSize: INSPECTOR_FONT_SIZE_XS_PX,
     color: "#b5b4a6",
     textTransform: "lowercase",
