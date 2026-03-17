@@ -42,11 +42,6 @@ export interface InlineStyles {
   actionBar: CSSProperties;
   actionButton: CSSProperties;
   actionMessage: CSSProperties;
-  fileMetaBlock: CSSProperties;
-  fileMetaPrimary: CSSProperties;
-  fileMetaSecondary: CSSProperties;
-  inlineDetailsButton: CSSProperties;
-  gitBlock: CSSProperties;
   panelHeader: CSSProperties;
   panelTitle: CSSProperties;
   panelActions: CSSProperties;
@@ -139,17 +134,17 @@ export const styles: InlineStyles = {
     flexWrap: "wrap",
     alignItems: "center",
     gap: INSPECTOR_ROW_GAP_PX,
-    marginBottom: INSPECTOR_ROW_GAP_PX,
+    marginBottom: INSPECTOR_SECTION_GAP_PX,
   },
   actionButton: {
-    border: "1px solid #1d4ed8",
+    border: "1px solid #4a4a42",
     borderRadius: INSPECTOR_RADIUS_PX,
-    background: "#2563eb",
-    color: "#f8fbff",
+    background: "#171714",
+    color: "#efedd8",
     cursor: "pointer",
-    fontSize: INSPECTOR_FONT_SIZE_SM_PX,
-    fontWeight: INSPECTOR_FONT_WEIGHT_BOLD,
-    padding: "8px 12px",
+    fontSize: INSPECTOR_FONT_SIZE_XS_PX,
+    fontWeight: INSPECTOR_FONT_WEIGHT_MEDIUM,
+    padding: "5px 10px",
     lineHeight: INSPECTOR_LINE_HEIGHT_COMPACT,
   },
   actionMessage: {
@@ -157,41 +152,6 @@ export const styles: InlineStyles = {
     fontSize: INSPECTOR_FONT_SIZE_XS_PX,
     marginLeft: "auto",
     textTransform: "lowercase",
-  },
-  fileMetaBlock: {
-    marginBottom: INSPECTOR_SECTION_GAP_PX,
-  },
-  fileMetaPrimary: {
-    margin: `0 0 ${INSPECTOR_ROW_GAP_PX}px`,
-    color: "#efedd8",
-    fontSize: INSPECTOR_FONT_SIZE_SM_PX,
-    fontWeight: INSPECTOR_FONT_WEIGHT_BOLD,
-    fontFamily: "ui-monospace, Menlo, Monaco, Consolas, monospace",
-  },
-  fileMetaSecondary: {
-    margin: 0,
-    color: "#a9a896",
-    fontSize: INSPECTOR_FONT_SIZE_XS_PX,
-    lineHeight: INSPECTOR_LINE_HEIGHT,
-    wordBreak: "break-word",
-    fontFamily: "ui-monospace, Menlo, Monaco, Consolas, monospace",
-  },
-  inlineDetailsButton: {
-    border: "1px solid #4a4a42",
-    borderRadius: INSPECTOR_RADIUS_PX,
-    background: "#121210",
-    color: "#d5d3c1",
-    cursor: "pointer",
-    fontSize: INSPECTOR_FONT_SIZE_XS_PX,
-    fontWeight: INSPECTOR_FONT_WEIGHT_MEDIUM,
-    padding: "4px 8px",
-    lineHeight: INSPECTOR_LINE_HEIGHT_COMPACT,
-    marginBottom: INSPECTOR_ROW_GAP_PX,
-  },
-  gitBlock: {
-    marginTop: INSPECTOR_SECTION_GAP_PX,
-    borderTop: "1px solid #2d2d28",
-    paddingTop: INSPECTOR_SECTION_GAP_PX,
   },
   panelHeader: {
     display: "flex",

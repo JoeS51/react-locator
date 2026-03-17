@@ -1,6 +1,6 @@
-# react-source-inspector
+# React Locator
 
-Dev inspector UI for React apps that combines `element-source` file locations with `git blame` metadata.
+A React Dev tool built on top of [element-source](https://github.com/aidenybai/element-source). Helps you easily locate UI components in your IDE (if people still use one) of choice and shows `git blame` metadata of the component.
 
 ## Install
 

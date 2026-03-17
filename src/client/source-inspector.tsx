@@ -28,7 +28,6 @@ import {
   isInspectorHelpKeybinding,
   isInspectorToggleKeybinding,
   isTypingContext,
-  sanitizeSourceFilePath,
   type HoverBounds,
 } from "./source-inspector-utils.js";
 
@@ -50,7 +49,6 @@ export const SourceInspector = ({
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isHelpVisible, setIsHelpVisible] = useState(false);
   const [isGitDetailsVisible, setIsGitDetailsVisible] = useState(false);
-  const [isElementDetailsVisible, setIsElementDetailsVisible] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const shellElementRef = useRef<HTMLDivElement | null>(null);
   const hoveredElementRef = useRef<Element | null>(null);
@@ -96,7 +94,6 @@ export const SourceInspector = ({
     setHoverElementInfo(null);
     setHoverBounds(null);
     setIsGitDetailsVisible(false);
-    setIsElementDetailsVisible(false);
   }, []);
 
   const resolveElementInfoCached = useCallback(async (target: Element): Promise<ElementInfo> => {
@@ -294,7 +291,6 @@ export const SourceInspector = ({
             setIsPopupVisible(false);
             setIsHelpVisible(false);
             setIsGitDetailsVisible(false);
-            setIsElementDetailsVisible(false);
             setHoverElementInfo(null);
             setHoverBounds(null);
             setData(null);
@@ -320,7 +316,6 @@ export const SourceInspector = ({
       setIsPopupVisible(false);
       setIsHelpVisible(false);
       setIsGitDetailsVisible(false);
-      setIsElementDetailsVisible(false);
       setHoverElementInfo(null);
       setHoverBounds(null);
       setData(null);
@@ -348,7 +343,6 @@ export const SourceInspector = ({
       return;
     }
     setIsGitDetailsVisible(false);
-    setIsElementDetailsVisible(false);
     setIsPopupVisible(false);
     const frameRequest = requestAnimationFrame(() => {
       setIsPopupVisible(true);
@@ -433,11 +427,6 @@ export const SourceInspector = ({
   const sourceLineNumber = data?.elementInfo.source?.lineNumber ?? null;
   const ideFileLink = sourceFilePath ? getIdeFileLink(sourceFilePath, sourceLineNumber) : null;
   const analysisTitle = data?.elementInfo.componentName ?? (isLoading ? "Analyzing..." : "Unknown Component");
-  const normalizedSourceFilePath = sourceFilePath ? sanitizeSourceFilePath(sourceFilePath) : null;
-  const sourceFileName = normalizedSourceFilePath ? normalizedSourceFilePath.split("/").filter(Boolean).at(-1) : null;
-  const sourcePrimaryLabel = sourceFileName
-    ? `${sourceFileName}:${sourceLineNumber ?? "n/a"}`
-    : "source file unavailable";
 
   if (!enabled) return null;
 
@@ -518,7 +507,7 @@ export const SourceInspector = ({
                       window.open(ideFileLink, "_self");
                     }}
                   >
-                    🚀 Open in IDE
+                    open in IDE
                   </button>
                   {actionMessage ? <span style={styles.actionMessage}>{actionMessage}</span> : null}
                 </div>
@@ -526,34 +515,43 @@ export const SourceInspector = ({
 
               {data && (
                 <>
-                  <div style={styles.fileMetaBlock}>
-                    <p style={styles.fileMetaPrimary}>📄 {sourcePrimaryLabel}</p>
-                    <p style={styles.fileMetaSecondary}>{normalizedSourceFilePath ?? "n/a"}</p>
-                  </div>
-
-                  <button
-                    type="button"
-                    style={styles.inlineDetailsButton}
-                    onClick={() => {
-                      setIsElementDetailsVisible((previous) => !previous);
-                    }}
-                  >
-                    {isElementDetailsVisible ? "▲ Element details" : "▼ Element details"}
-                  </button>
-
-                  {isElementDetailsVisible && (
+                  <div style={styles.section}>
+                    <p style={styles.sectionTitle}>element</p>
                     <div style={styles.row}>
                       <span style={styles.key}>tag</span>
                       <code style={styles.codeValue}>{data.elementInfo.tagName || "n/a"}</code>
                     </div>
-                  )}
 
-                  {isElementDetailsVisible && (
                     <div style={styles.row}>
                       <span style={styles.key}>component</span>
                       <code style={styles.codeValue}>{data.elementInfo.componentName ?? "n/a"}</code>
                     </div>
-                  )}
+                  </div>
+
+                  <div style={styles.section}>
+                    <p style={styles.sectionTitle}>source location</p>
+                    <div style={styles.row}>
+                      <span style={styles.key}>file</span>
+                      {data.elementInfo.source?.filePath ? (
+                        <a
+                          href={getIdeFileLink(
+                            data.elementInfo.source.filePath,
+                            data.elementInfo.source.lineNumber,
+                          )}
+                          style={styles.linkValue}
+                        >
+                          {data.elementInfo.source.filePath}
+                        </a>
+                      ) : (
+                        <code style={styles.codeValue}>n/a</code>
+                      )}
+                    </div>
+
+                    <div style={styles.row}>
+                      <span style={styles.key}>line</span>
+                      <code style={styles.codeValue}>{data.elementInfo.source?.lineNumber ?? "n/a"}</code>
+                    </div>
+                  </div>
 
                   {data.error ? (
                     <div style={styles.section}>
@@ -566,7 +564,7 @@ export const SourceInspector = ({
                   ) : null}
 
                   {data.blame && (
-                    <div style={styles.gitBlock}>
+                    <div style={styles.section}>
                     <p style={styles.sectionTitle}>git</p>
                       <p style={styles.gitSummaryMeta}>
                         {getAuthorDisplayName(data.blame)} • {formatAuthorDate(data.blame.authorTimeUnix)}
