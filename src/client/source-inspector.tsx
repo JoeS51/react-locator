@@ -97,8 +97,6 @@ export const SourceInspector = ({
     new Map(),
   );
   const isSelectionLocked = Boolean(data) && !isLoading;
-  const inspectorModeTitle = isSelectionLocked || isLoading ? "analysis mode" : "hover mode";
-  const inspectorModeHint = "";
 
   const setTransientActionMessage = useCallback((message: string) => {
     if (actionMessageTimeoutRef.current !== null) {
@@ -504,21 +502,6 @@ export const SourceInspector = ({
       {inspecting && (
         <>
           <div style={styles.modeFrame} />
-          <div
-            style={{
-              ...styles.modeBanner,
-              ...(isSelectionLocked || isLoading ? styles.modeBannerAnalysis : styles.modeBannerHover),
-            }}
-          >
-            <span
-              style={{
-                ...styles.modeDot,
-                ...(isSelectionLocked || isLoading ? styles.modeDotAnalysis : styles.modeDotHover),
-              }}
-            />
-            <span style={styles.modeText}>{inspectorModeTitle}</span>
-            {inspectorModeHint ? <span style={styles.modeHint}>{inspectorModeHint}</span> : null}
-          </div>
           <div
             style={{
               ...styles.modeIntroOverlay,
