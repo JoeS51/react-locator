@@ -48,6 +48,16 @@ export interface InlineStyles {
   panelCloseButton: CSSProperties;
   helpPanel: CSSProperties;
   helpTitle: CSSProperties;
+  helpDemo: CSSProperties;
+  helpDemoCanvas: CSSProperties;
+  helpDemoCardPrimary: CSSProperties;
+  helpDemoCardSecondary: CSSProperties;
+  helpDemoCardLine: CSSProperties;
+  helpDemoHighlight: CSSProperties;
+  helpDemoLabel: CSSProperties;
+  helpDemoLabelPrimary: CSSProperties;
+  helpDemoLabelSecondary: CSSProperties;
+  helpDemoCursor: CSSProperties;
   helpList: CSSProperties;
   helpListItem: CSSProperties;
   helpFooter: CSSProperties;
@@ -201,6 +211,91 @@ export const styles: InlineStyles = {
     fontSize: 24,
     fontWeight: INSPECTOR_FONT_WEIGHT_BOLD,
     color: "#efedd8",
+  },
+  helpDemo: {
+    position: "relative",
+    height: 140,
+    border: "1px solid #3f3f38",
+    borderRadius: INSPECTOR_RADIUS_PX,
+    background: "linear-gradient(160deg, #12120f 0%, #0d0d0b 100%)",
+    marginBottom: INSPECTOR_SECTION_GAP_PX,
+    overflow: "hidden",
+  },
+  helpDemoCanvas: {
+    position: "absolute",
+    inset: 0,
+    padding: 14,
+  },
+  helpDemoCardPrimary: {
+    position: "absolute",
+    top: 28,
+    left: 20,
+    width: 174,
+    height: 62,
+    border: "1px solid #2e2e29",
+    borderRadius: INSPECTOR_RADIUS_PX,
+    background: "#171714",
+    boxShadow: "0 10px 20px -16px rgba(0, 0, 0, 0.8)",
+    padding: 10,
+    boxSizing: "border-box",
+  },
+  helpDemoCardSecondary: {
+    position: "absolute",
+    top: 34,
+    left: 214,
+    width: 150,
+    height: 54,
+    border: "1px solid #2e2e29",
+    borderRadius: INSPECTOR_RADIUS_PX,
+    background: "#171714",
+    boxShadow: "0 10px 20px -16px rgba(0, 0, 0, 0.8)",
+    padding: 10,
+    boxSizing: "border-box",
+  },
+  helpDemoCardLine: {
+    height: 6,
+    borderRadius: INSPECTOR_RADIUS_PX,
+    background: "#292925",
+    marginBottom: 8,
+  },
+  helpDemoHighlight: {
+    position: "absolute",
+    top: 28,
+    left: 22,
+    width: 174,
+    height: 62,
+    border: "2px solid rgba(0, 0, 0, 0.72)",
+    background: "rgba(120, 120, 120, 0.18)",
+    boxSizing: "border-box",
+    animation: "inspector-help-highlight-move 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite",
+  },
+  helpDemoLabel: {
+    position: "absolute",
+    border: "1px solid #4a4a42",
+    background: "rgba(10, 10, 8, 0.96)",
+    color: "#efedd8",
+    padding: "4px 8px",
+    fontSize: INSPECTOR_FONT_SIZE_XS_PX,
+    fontWeight: INSPECTOR_FONT_WEIGHT_MEDIUM,
+  },
+  helpDemoLabelPrimary: {
+    top: 2,
+    left: 22,
+    animation: "inspector-help-label-primary 2.4s steps(1, end) infinite",
+  },
+  helpDemoLabelSecondary: {
+    top: 8,
+    left: 214,
+    animation: "inspector-help-label-secondary 2.4s steps(1, end) infinite",
+  },
+  helpDemoCursor: {
+    position: "absolute",
+    width: 12,
+    height: 18,
+    borderRadius: 2,
+    background: "#f3f2e6",
+    boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.45)",
+    animation: "inspector-help-cursor-move 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite",
   },
   helpList: {
     margin: 0,
