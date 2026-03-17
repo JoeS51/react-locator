@@ -1,6 +1,9 @@
 # React Locator
 
-A React Dev tool built on top of [element-source](https://github.com/aidenybai/element-source). Helps you easily locate UI components in your IDE (if people still use one) of choice and shows `git blame` metadata of the component.
+A React Dev tool built on top of [element-source](https://github.com/aidenybai/element-source). Helps you easily locate UI components in your IDE (if people still use one) of choice and shows `git` metadata of the component.
+
+## Why
+It's annoying to search for specific components in your IDE. Tools like LocatorJS are great, but it's a google chrome extension while this is an npm package. This tool also shows provides more extensibility.
 
 ## Install
 
