@@ -502,13 +502,13 @@ export const styles: InlineStyles = {
   codeValue: {
     color: "#f2f0da",
     wordBreak: "break-word",
-    fontFamily: "ui-monospace, Menlo, Monaco, Consolas, monospace",
+    fontFamily: INSPECTOR_FONT_FAMILY,
   },
   linkValue: {
     color: "#efeccf",
     textDecoration: "underline",
     wordBreak: "break-word",
-    fontFamily: "ui-monospace, Menlo, Monaco, Consolas, monospace",
+    fontFamily: INSPECTOR_FONT_FAMILY,
   },
 };
 

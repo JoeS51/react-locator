@@ -32,12 +32,12 @@ export const INSPECTOR_ACTION_MESSAGE_TIMEOUT_MS = 1800;
 export const INSPECTOR_FONT_SIZE_SM_PX = 12;
 export const INSPECTOR_FONT_SIZE_XS_PX = 11;
 export const INSPECTOR_FONT_SIZE_TITLE_PX = 16;
-export const INSPECTOR_FONT_WEIGHT_MEDIUM = 600;
-export const INSPECTOR_FONT_WEIGHT_BOLD = 700;
+export const INSPECTOR_FONT_WEIGHT_MEDIUM = 500;
+export const INSPECTOR_FONT_WEIGHT_BOLD = 500;
 export const INSPECTOR_LETTER_SPACING_EM = 0.2;
 export const INSPECTOR_LINE_HEIGHT = 1.4;
 export const INSPECTOR_LINE_HEIGHT_COMPACT = 1;
-export const INSPECTOR_FONT_FAMILY = "'Manrope', 'Open Sans', 'Inter', 'Avenir Next', 'Helvetica Neue', sans-serif";
+export const INSPECTOR_FONT_FAMILY = "var(--font-geist-pixel-square), 'Geist Pixel Square', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace";
 
 export const INSPECTOR_HOVER_LABEL_OFFSET_Y_PX = 6;
 export const INSPECTOR_HOVER_LABEL_PADDING_Y_PX = 6;
