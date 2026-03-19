@@ -1,17 +1,14 @@
-# React Locator
+# react-source-inspector
 
-A React Dev tool built on top of [element-source](https://github.com/aidenybai/element-source). Helps you easily locate UI components in your IDE (if people still use one) of choice and shows `git` metadata of the component.
-
-## Why
-It's annoying to search for specific components in your IDE. Tools like LocatorJS are great, but it's a google chrome extension while this is an npm package. This tool also shows provides more extensibility.
+A React dev overlay that lets you inspect rendered components, jump to source in your IDE, and view git metadata.
 
 ## Install
 
 ```bash
-npm install -D react-source-inspector element-source bippy
+npm install -D react-source-inspector bippy
 ```
 
-## Vite setup
+## Vite setup (with git metadata)
 
 ```ts
 // vite.config.ts
@@ -49,3 +46,15 @@ export const App = () => (
   </>
 );
 ```
+
+## Shortcuts
+
+- `cmd + option + i`: toggle inspector mode
+- `option + click`: capture selected component
+- `esc`: exit inspector mode
+- `cmd + option + h`: open quick guide
+
+## What is required?
+
+- `SourceInspector` mount + `bippy` instrumentation are required for source mapping.
+- `sourceInspectorVitePlugin()` is required only if you want built-in git metadata endpoint support in Vite.

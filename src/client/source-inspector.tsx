@@ -494,6 +494,18 @@ export const SourceInspector = ({
   }, [data, isHelpVisible, isLoading]);
 
   useEffect(() => {
+    const isOverlayOpen = Boolean(isLoading || data || isHelpVisible);
+    if (!isOverlayOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [data, isHelpVisible, isLoading]);
+
+  useEffect(() => {
     if (!inspecting || isSelectionLocked || isLoading || isHelpVisible) return;
     const cacheKey = getBlameCacheKey(hoverElementInfo?.source ?? null);
     if (!cacheKey) return;
