@@ -1,4 +1,4 @@
-# react-source-inspector
+# React Locator
 
 A React dev overlay that lets you inspect rendered components, jump to source in your IDE, and view git metadata.
 
