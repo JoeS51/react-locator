@@ -2,13 +2,21 @@
 
 A React dev overlay that lets you inspect rendered components, jump to source in your IDE, and view git metadata.
 
-## Install
+<video src="./assets/export-1773893512682.mp4" controls muted playsinline loop width="100%"></video>
+
+## Why use it?
+
+- Inspect rendered React components directly in the browser
+- Jump from selected UI to source in your IDE
+- See git metadata for faster debugging and review context
+
+## Installation
 
 ```bash
 npm install -D react-source-inspector bippy
 ```
 
-## Vite setup (with git metadata)
+## Quick start (Vite + git metadata)
 
 ```ts
 // vite.config.ts
@@ -47,14 +55,14 @@ export const App = () => (
 );
 ```
 
+## Requirements
+
+- `SourceInspector` mount + `bippy` instrumentation are required for source mapping
+- `sourceInspectorVitePlugin()` is only required if you want the built-in git metadata endpoint in Vite
+
 ## Shortcuts
 
 - `cmd + option + i`: toggle inspector mode
 - `option + click`: capture selected component
 - `esc`: exit inspector mode
 - `cmd + option + h`: open quick guide
-
-## What is required?
-
-- `SourceInspector` mount + `bippy` instrumentation are required for source mapping.
-- `sourceInspectorVitePlugin()` is required only if you want built-in git metadata endpoint support in Vite.
