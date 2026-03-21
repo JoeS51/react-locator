@@ -2,7 +2,9 @@
 
 A React dev overlay that lets you inspect rendered components, jump to source in your IDE, and view git metadata.
 
-<video src="./assets/export-1773893512682.mp4" controls muted playsinline loop width="100%"></video>
+[![Watch demo](assets/readme-demo.gif)](assets/export-1773893512682.mp4)
+
+[Watch the full MP4 demo](assets/export-1773893512682.mp4)
 
 ## Why use it?
 
